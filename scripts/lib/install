@@ -38,11 +38,17 @@ ln -nsf /home/zulip/deployments/next /root/zulip
 ln -nsf "$deploy_path" /home/zulip/deployments/next
 ln -nsf "$deploy_path" /home/zulip/deployments/current
 ln -nsf /etc/zulip/settings.py "$deploy_path"/zproject/local_settings.py
-cp -rT "$deploy_path"/prod-static/serve /home/zulip/prod-static
 chown -R zulip:zulip /home/zulip /var/log/zulip /etc/zulip/settings.py
 chown zulip:zulip /var/run/supervisor.sock
 
 cd /home/zulip/deployments/current
+
+# Production assets
+apt-get install -y nodejs closure-compiler yui-compressor
+mv /usr/bin/closure-compiler /usr/bin/closure-compiler.jar
+echo -e "#! /bin/bash\njava -jar /usr/bin/closure-compiler.jar \$@" > /usr/bin/closure-compiler
+chmod +x /usr/bin/closure-compiler
+./tools/update-prod-static
 
 set +x
 cat <<EOF
