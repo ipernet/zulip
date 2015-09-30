@@ -55,6 +55,7 @@ chmod +x /usr/bin/closure-compiler
 ./tools/update-prod-static
 cp -rp static/* /home/zulip/prod-static/
 
+chown zulip:zulip /var/log/zulip/*
 service supervisor start
 
 set +x
