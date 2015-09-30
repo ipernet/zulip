@@ -32,6 +32,8 @@ ln -nsf /etc/zulip/settings.py /root/zulip/zproject/local_settings.py
 
 /root/zulip/scripts/setup/postgres-init-db
 
+service supervisor stop
+
 deploy_path=$(/root/zulip/zulip_tools.py make_deploy_path)
 mv /root/zulip "$deploy_path"
 ln -nsf /home/zulip/deployments/next /root/zulip
@@ -43,12 +45,18 @@ chown zulip:zulip /var/run/supervisor.sock
 
 cd /home/zulip/deployments/current
 
-# Production assets
+# Production tasks
 apt-get install -y nodejs closure-compiler yui-compressor
-mv /usr/bin/closure-compiler /usr/bin/closure-compiler.jar
+
+# /usr/bin/closure-compiler is a symlink to the JAR file (ubuntu:trusty)
+rm /usr/bin/closure-compiler
 echo -e "#! /bin/bash\njava -jar /usr/bin/closure-compiler.jar \$@" > /usr/bin/closure-compiler
 chmod +x /usr/bin/closure-compiler
+
 ./tools/update-prod-static
+
+service supervisor start
+
 
 set +x
 cat <<EOF
